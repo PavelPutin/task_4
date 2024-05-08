@@ -18,7 +18,8 @@ namespace task_4
     {
         public MainWindow()
         {
-            
+            InitializeComponent();
+            //MessageBox.Show(Application.Current);
         }
     }
 }

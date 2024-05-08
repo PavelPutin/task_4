@@ -13,7 +13,7 @@ namespace task_4
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            MessageBox.Show(AppConfiguration.Instance.QUADCOPTER_LANDING_TIME.ToString());
+            
         }
     }
 
