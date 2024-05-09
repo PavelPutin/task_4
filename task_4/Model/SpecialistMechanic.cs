@@ -4,14 +4,13 @@ using task_4.shared;
 
 namespace task_4.Model
 {
-    public class QuadOperator : IMechanic
+    public class SpecialistMechanic : IMechanic
     {
         private static int COUNTER;
 
         public enum State
         {
             WAITING,
-            QUADCOPTER_CONTROLLING,
             TRAVELLING_TO_BROKEN_QUADCOPTER,
             REPAIRING,
             TRAVELLING_BACK
@@ -23,14 +22,14 @@ namespace task_4.Model
         private bool fireRequest = false;
         private Quadcopter? quadcopterForRepair;
 
-        public State CurrentState 
+        public State CurrentState
         {
-            get => currentState; 
+            get => currentState;
             private set
             {
                 currentState = value;
                 OnPropertyChanged(nameof(CurrentState));
-            } 
+            }
         }
         public int Position
         {
@@ -50,7 +49,7 @@ namespace task_4.Model
                 OnPropertyChanged(nameof(FireRequest));
             }
         }
-        public int RepairTime => AppConfiguration.Instance.OPERATOR_REPAIR_TIME;
+        int IMechanic.RepairTime => AppConfiguration.Instance.SPECIALIST_MECHANIC_REPAIR_TIME;
         public Quadcopter? QuadcopterForRepair
         {
             get => quadcopterForRepair;
@@ -59,10 +58,6 @@ namespace task_4.Model
                 quadcopterForRepair = value;
                 OnPropertyChanged(nameof(QuadcopterForRepair));
             }
-        }
-        public void StartWorking()
-        {
-            
         }
 
         public void QuadcopterBrokenEventHandler(Quadcopter brokenOne)
@@ -79,7 +74,7 @@ namespace task_4.Model
 
         public override string ToString()
         {
-            return "Оператор " + id;
+            return "Механик " + id;
         }
     }
 }
