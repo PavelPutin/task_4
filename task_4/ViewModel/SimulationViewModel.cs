@@ -39,9 +39,9 @@ namespace task_4.ViewModel
             {
                 foreach(var quadOperator in QuadOperators)
                 {
-                    quadcopter.AddOperatorsWaiting(quadOperator.WaitControlling);
-                    quadOperator.AddQuadcoptersWaiting(quadcopter.Controlling);
-                    quadOperator.StartControlling += quadcopter.OnStartControlling;
+                    quadcopter.ReadyToFly += quadOperator.OnReadyToFly;
+                    quadcopter.ReleaseControll += quadOperator.OnReleaseControll;
+                    quadOperator.GotQuadcopterControll += quadcopter.OnGotQuadcopterControll;
                 }
             }
 

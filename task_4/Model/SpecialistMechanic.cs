@@ -60,7 +60,7 @@ namespace task_4.Model
             }
         }
 
-        public void QuadcopterBrokenEventHandler(Quadcopter brokenOne)
+        public void OnQuadcopterBroken(Quadcopter brokenOne)
         {
 
         }

@@ -10,7 +10,7 @@
         <local1:LogMessageToStringConverter x:Key="logMessageToStringConverter"/>
     </Window.Resources>
     <Grid>
-        <ListView ItemsSource="{Binding Path=Quadcopters}" Margin="29,49,457,124">
+        <ListView ItemsSource="{Binding Path=Quadcopters}" Margin="29,49,457,269">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock>
@@ -20,7 +20,14 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <ListView x:Name="logMessages" ItemsSource="{Binding Path=Logger.Messages}" Margin="432,49,83,123">
+        <ListView ItemsSource="{Binding QuadOperators}" Margin="29,180,457,123">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock><Run Text="{Binding CurrentState, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Position, Mode=OneWay}"/></TextBlock>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView x:Name="logMessages" ItemsSource="{Binding Path=Logger.Messages}" Margin="348,49,83,123">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={StaticResource logMessageToStringConverter}}"/>
