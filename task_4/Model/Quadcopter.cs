@@ -7,8 +7,11 @@ namespace task_4.Model
     public class Quadcopter : INotifyPropertyChanged
     {
         private static int COUNTER;
+        private static Semaphore loadingOnPolarStation = new(AppConfiguration.Instance.MAXIMUM_NUMBER_QUADCOPTERS_SERVICED, AppConfiguration.Instance.MAXIMUM_NUMBER_QUADCOPTERS_SERVICED);
+        private static Semaphore loadingOnPort = new(AppConfiguration.Instance.MAXIMUM_NUMBER_QUADCOPTERS_SERVICED, AppConfiguration.Instance.MAXIMUM_NUMBER_QUADCOPTERS_SERVICED);
         public enum State
         {
+            PREFLYING_PREPARING_WAITING,
             PREFLYING_PREPARING,
             READY_TO_FLY,
             TAKING_OFF,
@@ -25,7 +28,7 @@ namespace task_4.Model
         }
 
         private int id = Interlocked.Increment(ref COUNTER);
-        private State currentState = State.PREFLYING_PREPARING;
+        private State currentState = State.PREFLYING_PREPARING_WAITING;
         private bool decommissionRequest = false;
         private Place destination = Place.POLAR_STATION;
         private int position = 0;
@@ -89,10 +92,32 @@ namespace task_4.Model
             {
                 switch (CurrentState)
                 {
+                    case State.PREFLYING_PREPARING_WAITING:
+                        Logger.Instance.Log(ToString(), "Ожидание предполётной подготовки в " + (Destination == Place.PORT ? Place.POLAR_STATION : Place.PORT));
+                        switch (Destination)
+                        {
+                            case Place.POLAR_STATION:
+                                loadingOnPort.WaitOne();
+                                break;
+                            case Place.PORT:
+                                loadingOnPolarStation.WaitOne();
+                                break;
+                        }
+                        CurrentState = State.PREFLYING_PREPARING;
+                        break;
                     case State.PREFLYING_PREPARING:
                         Logger.Instance.Log(ToString(), "Начало предполётной подготовки");
                         Thread.Sleep(TimeSpan.FromSeconds(AppConfiguration.Instance.QUADCOPTER_LOADING_TIME));
                         Logger.Instance.Log(ToString(), "Предполётная подготовка завершена");
+                        switch (Destination)
+                        {
+                            case Place.POLAR_STATION:
+                                loadingOnPort.Release();
+                                break;
+                            case Place.PORT:
+                                loadingOnPolarStation.Release();
+                                break;
+                        }
                         CurrentState = State.READY_TO_FLY;
                         break;
                     case State.READY_TO_FLY:
