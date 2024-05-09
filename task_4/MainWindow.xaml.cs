@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using task_4.Model;
 
 namespace task_4
 {
@@ -19,7 +20,10 @@ namespace task_4
         public MainWindow()
         {
             InitializeComponent();
-            //MessageBox.Show(Application.Current);
+            Quadcopter quadcopter = new Quadcopter();
+            DataContext = quadcopter;
+            Thread quadThread = new Thread(quadcopter.StartExploitation);
+            quadThread.Start();
         }
     }
 }

@@ -12,6 +12,9 @@ namespace task_4.shared
             var config = new ConfigurationBuilder()
                         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                         .AddJsonFile("application.json").Build();
+
+            DISTANCE = parseIntConfig(config, "DISTANCE", 100);
+
             QUADCOPTERS_INIT_NUMBER = parseIntConfig(config, "QUADCOPTERS_INIT_NUMBER");
             OPERATORS_INIT_NUMBER = parseIntConfig(config, "OPERATORS_INIT_NUMBER");
             SPECIALIZED_MECHANICS_INIT_NUMBER = parseIntConfig(config, "SPECIALIZED_MECHANICS_INIT_NUMBER");
@@ -30,7 +33,8 @@ namespace task_4.shared
         }
 
         public static AppConfiguration Instance => instance ??= new AppConfiguration();
-
+        
+        public int DISTANCE { get; }
         public int QUADCOPTERS_INIT_NUMBER { get; }
         public int OPERATORS_INIT_NUMBER { get; }
         public int SPECIALIZED_MECHANICS_INIT_NUMBER { get; }
