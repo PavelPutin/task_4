@@ -87,7 +87,7 @@ namespace task_4.Model
             if (CurrentState != State.WAITING)
                 return;
 
-            if (Monitor.TryEnter(readyOne.ControllingLocker))
+            if (Interlocked.CompareExchange(ref readyOne.controllingLocker, 1, 0) == 0)
             {
                 Logger.Instance.Log(ToString(), "Получил управление над " + readyOne.ToString());
                 ControllingQuadcopter = readyOne;
@@ -106,7 +106,7 @@ namespace task_4.Model
             if (controllingQuadcopter == quadcopter)
             {
                 Logger.Instance.Log(ToString(), "Прекратил управление " + quadcopter.ToString());
-                Monitor.Exit(quadcopter.ControllingLocker);
+                Interlocked.Exchange(ref quadcopter.controllingLocker, 0);
                 controllingQuadcopter = null;
                 CurrentState = State.WAITING;
             }

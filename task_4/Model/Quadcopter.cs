@@ -34,7 +34,7 @@ namespace task_4.Model
         private int position = 0;
         private QuadOperator? controllingOperator;
 
-        object controllingLocker = new();
+        public int controllingLocker = 0;
 
         public State CurrentState {
             get => currentState;
@@ -80,7 +80,6 @@ namespace task_4.Model
                 OnPropertyChanged(nameof(ControllingOerator));
             }
         }
-        public object ControllingLocker => controllingLocker;
 
         public void StartExploitation()
         {
