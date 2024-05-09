@@ -3,10 +3,30 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:task_4"
+        xmlns:local="clr-namespace:task_4" xmlns:local1="clr-namespace:task_4.ViewModel"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <local1:LogMessageToStringConverter x:Key="logMessageToStringConverter"/>
+    </Window.Resources>
     <Grid>
-        <Label Content="{Binding Path=CurrentState}" HorizontalAlignment="Left" Margin="345,179,0,0" VerticalAlignment="Top"/>
+        <ListView ItemsSource="{Binding Path=Quadcopters}" Margin="29,49,457,124">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <Run Text="{Binding Path=CurrentState, Mode=OneWay}"/>
+                        <Run Text="{Binding Path=Position, Mode=OneWay}"/>
+                    </TextBlock>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView x:Name="logMessages" ItemsSource="{Binding Path=Logger.Messages}" Margin="432,49,83,123">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource logMessageToStringConverter}}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
     </Grid>
 </Window>

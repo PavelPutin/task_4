@@ -2,7 +2,7 @@
 
 namespace task_4.Model
 {
-    internal class Logger
+    public class Logger
     {
         private static Logger? instance;
 
@@ -15,6 +15,11 @@ namespace task_4.Model
         public ObservableCollection<LogMessage> Messages { get; }
 
         public void Log(string sender, string message)
-            => Messages.Add(new LogMessage(sender, message));
+        {
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Messages.Add(new LogMessage(sender, message));
+            });
+        }
     }
 }
