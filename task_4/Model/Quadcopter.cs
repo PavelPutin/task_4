@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using task_4.shared;
+using task_4.ViewModel;
 
 namespace task_4.Model
 {
@@ -27,7 +28,14 @@ namespace task_4.Model
             POLAR_STATION
         }
 
+        public Quadcopter()
+        {
+            thread = new(StartExploitation);
+            thread.IsBackground = true;
+        }
+
         private int id = Interlocked.Increment(ref COUNTER);
+        private Thread thread;
         private State currentState = State.PREFLYING_PREPARING_WAITING;
         private bool decommissionRequest = false;
         private Place destination = Place.POLAR_STATION;
@@ -80,11 +88,11 @@ namespace task_4.Model
                 OnPropertyChanged(nameof(ControllingOerator));
             }
         }
-
+        public Thread Thread => thread;
         public void StartExploitation()
         {
             Logger.Instance.Log(ToString(), "Введён в эксплуатацию");
-            while (true)
+            while (!((CurrentState == State.PREFLYING_PREPARING_WAITING || CurrentState == State.PREFLYING_PREPARING || CurrentState == State.READY_TO_FLY) && DecommissionRequest))
             {
                 switch (CurrentState)
                 {
@@ -150,6 +158,8 @@ namespace task_4.Model
                         break;
                 }
             }
+            Logger.Instance.Log(ToString(), "Списан");
+            Decommissioned?.Invoke(this);
         }
 
         public void OnGotQuadcopterControll(QuadOperator quadOperator, Quadcopter quadcopter)
@@ -168,11 +178,27 @@ namespace task_4.Model
         public delegate void ReleaseControllEventHandler(Quadcopter quadcopter);
         public event ReleaseControllEventHandler? ReleaseControll;
 
+        public delegate void DecommissionedEventHandler(Quadcopter quadcopter);
+        public event DecommissionedEventHandler? Decommissioned;
+
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+
+        private RelayCommand? removeQuadcopter;
+        public RelayCommand? RemoveQuadcopter
+        {
+            get
+            {
+                return removeQuadcopter ??= new RelayCommand(obj =>
+                {
+                    DecommissionRequest = true;
+                    Logger.Instance.Log(ToString(), "Получил запрос на списание");
+                });
+            }
         }
 
         override public string ToString()

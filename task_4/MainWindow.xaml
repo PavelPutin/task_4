@@ -7,16 +7,21 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
+        <local1:SimulationViewModel x:Key="simulation"/>
         <local1:LogMessageToStringConverter x:Key="logMessageToStringConverter"/>
     </Window.Resources>
     <Grid>
         <ListView ItemsSource="{Binding Path=Quadcopters}" Margin="29,49,457,269">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock>
-                        <Run Text="{Binding Path=CurrentState, Mode=OneWay}"/>
-                        <Run Text="{Binding Path=Position, Mode=OneWay}"/>
-                    </TextBlock>
+                    <StackPanel Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <TextBlock Grid.Column="0">
+                            <Run Text="{Binding Path=CurrentState, Mode=OneWay}"/>
+                            <Run Text="{Binding Path=Position, Mode=OneWay}"/>
+                            <Run Text="{Binding Path=DecommissionRequest, Mode=OneWay}"/>
+                        </TextBlock>
+                        <Button Grid.Column="1" Content="Удалить квадрокоптер" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding RemoveQuadcopter}" CommandParameter="{Binding}"/>
+                    </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
@@ -34,6 +39,6 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-
+        <Button x:Name="button" Content="Добавить квадрокоптер" HorizontalAlignment="Left" Margin="29,316,0,0" VerticalAlignment="Top" Command="{Binding AddQuadcopter}"/>
     </Grid>
 </Window>

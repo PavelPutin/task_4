@@ -17,7 +17,14 @@ namespace task_4.Model
             TRAVELLING_BACK
         }
 
+        public QuadOperator()
+        {
+            thread = new(StartWorking);
+            thread.IsBackground = true;
+        }
+
         private int id = Interlocked.Increment(ref COUNTER);
+        private Thread thread;
         private State currentState = State.WAITING;
         private int position = 0;
         private bool fireRequest = false;
@@ -70,6 +77,7 @@ namespace task_4.Model
                 OnPropertyChanged(nameof(ControllingQuadcopter));
             }
         }
+        public Thread Thread => thread;
         public void StartWorking()
         {
             Logger.Instance.Log(ToString(), "Начал работу");

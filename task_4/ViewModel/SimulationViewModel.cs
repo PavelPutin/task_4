@@ -11,9 +11,7 @@ namespace task_4.ViewModel
 {
     public class SimulationViewModel
     {
-        private List<Thread> quadcopterThreads = [];
         public ObservableCollection<Quadcopter> Quadcopters { get; } = [];
-        private List<Thread> quadOperatorThreads = [];
         public ObservableCollection<QuadOperator> QuadOperators { get; } = [];
         public Logger Logger { get; } = Logger.Instance;
 
@@ -23,18 +21,12 @@ namespace task_4.ViewModel
             {
                 Quadcopter quadcopter = new();
                 Quadcopters.Add(quadcopter);
-                Thread thread = new(quadcopter.StartExploitation);
-                thread.IsBackground = true;
-                quadcopterThreads.Add(thread);
             }
 
             for (int i = 0; i < AppConfiguration.Instance.OPERATORS_INIT_NUMBER; i++)
             {
                 QuadOperator quadOperator = new();
                 QuadOperators.Add(quadOperator);
-                Thread thread = new(quadOperator.StartWorking);
-                thread.IsBackground = true;
-                quadOperatorThreads.Add(thread);
             }
 
             foreach (var quadcopter in Quadcopters)
@@ -45,16 +37,58 @@ namespace task_4.ViewModel
                     quadcopter.ReleaseControll += quadOperator.OnReleaseControll;
                     quadOperator.GotQuadcopterControll += quadcopter.OnGotQuadcopterControll;
                 }
+                quadcopter.Decommissioned += OnDecommissioned;
             }
 
-            foreach(var thread in quadOperatorThreads)
+            foreach(var quadcopter in Quadcopters)
             {
-                thread.Start();
+                quadcopter.Thread.Start();
             }
 
-            foreach (var thread in quadcopterThreads)
+            foreach (var quadOperator in QuadOperators)
             {
-                thread.Start();
+                quadOperator.Thread.Start();
+            }
+        }
+
+        private void OnDecommissioned(Quadcopter quadcopter)
+        {
+            quadcopter.Decommissioned -= OnDecommissioned;
+            foreach (var quadOperator in QuadOperators)
+            {
+                quadcopter.ReadyToFly -= quadOperator.OnReadyToFly;
+                quadcopter.ReleaseControll -= quadOperator.OnReleaseControll;
+                quadOperator.GotQuadcopterControll -= quadcopter.OnGotQuadcopterControll;
+            }
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Quadcopters.Remove(quadcopter);
+            });
+        }
+
+        private RelayCommand? addQuadcopter;
+        public RelayCommand? AddQuadcopter
+        {
+            get
+            {
+                return addQuadcopter ??= new RelayCommand(obj =>
+                {
+                    Quadcopter quadcopter = new();
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        Quadcopters.Add(quadcopter);
+                    });
+
+                    foreach (var quadOperator in QuadOperators)
+                    {
+                        quadcopter.ReadyToFly += quadOperator.OnReadyToFly;
+                        quadcopter.ReleaseControll += quadOperator.OnReleaseControll;
+                        quadOperator.GotQuadcopterControll += quadcopter.OnGotQuadcopterControll;
+                    }
+                    quadcopter.Decommissioned += OnDecommissioned;
+
+                    quadcopter.Thread.Start();
+                });
             }
         }
     }
