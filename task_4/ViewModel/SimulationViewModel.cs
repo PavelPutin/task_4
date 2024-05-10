@@ -159,6 +159,7 @@ namespace task_4.ViewModel
                         quadOperator.GotQuadcopterControll += quadcopter.OnGotQuadcopterControll;
                     }
                     quadcopter.Decommissioned += OnDecommissioned;
+                    quadcopter.Broken += OnQuadcopterBroken;
 
                     quadcopter.Thread.Start();
                 });
