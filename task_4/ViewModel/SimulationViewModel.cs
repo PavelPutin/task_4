@@ -24,6 +24,7 @@ namespace task_4.ViewModel
                 Quadcopter quadcopter = new();
                 Quadcopters.Add(quadcopter);
                 Thread thread = new(quadcopter.StartExploitation);
+                thread.IsBackground = true;
                 quadcopterThreads.Add(thread);
             }
 
@@ -32,6 +33,7 @@ namespace task_4.ViewModel
                 QuadOperator quadOperator = new();
                 QuadOperators.Add(quadOperator);
                 Thread thread = new(quadOperator.StartWorking);
+                thread.IsBackground = true;
                 quadOperatorThreads.Add(thread);
             }
 

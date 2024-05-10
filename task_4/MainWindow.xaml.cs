@@ -19,11 +19,12 @@ namespace task_4
     /// </summary>
     public partial class MainWindow : Window
     {
+        private SimulationViewModel simulationViewModel = new();
+
         public MainWindow()
         {
             InitializeComponent();
             ((INotifyCollectionChanged)logMessages.Items.SourceCollection).CollectionChanged += MainWindow_CollectionChanged; ;
-            SimulationViewModel simulationViewModel = new();
             simulationViewModel.Init();
             DataContext = simulationViewModel;
         }
