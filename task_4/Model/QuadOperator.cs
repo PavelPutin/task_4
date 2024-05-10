@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using task_4.shared;
+using task_4.ViewModel;
 
 namespace task_4.Model
 {
@@ -30,6 +31,8 @@ namespace task_4.Model
         private bool fireRequest = false;
         private Quadcopter? controllingQuadcopter;
         private Quadcopter? quadcopterForRepair;
+
+        private object tryingGetControllLock = new();
 
         public State CurrentState 
         {
@@ -81,26 +84,28 @@ namespace task_4.Model
         public void StartWorking()
         {
             Logger.Instance.Log(ToString(), "Начал работу");
-            while (true)
+            while (!(CurrentState == State.WAITING && FireRequest))
             {
                 //switch (CurrentState)
                 //{
                 //    case State.WAITING: Logger.Instance.Log(ToString(), "Ожидает"); break;
                 //}
             }
+            Logger.Instance.Log(ToString(), "Уволен");
+            Fired?.Invoke(this);
         }
 
         public void OnReadyToFly(Quadcopter readyOne)
         {
-            if (CurrentState != State.WAITING)
-                return;
-
-            if (Interlocked.CompareExchange(ref readyOne.controllingLocker, 1, 0) == 0)
+            lock(tryingGetControllLock)
             {
-                Logger.Instance.Log(ToString(), "Получил управление над " + readyOne.ToString());
-                ControllingQuadcopter = readyOne;
-                CurrentState = State.QUADCOPTER_CONTROLLING;
-                GotQuadcopterControll?.Invoke(this, readyOne);
+                if (CurrentState == State.WAITING && Interlocked.CompareExchange(ref readyOne.controllingLocker, 1, 0) == 0)
+                {
+                    Logger.Instance.Log(ToString(), "Получил управление над " + readyOne.ToString());
+                    ControllingQuadcopter = readyOne;
+                    CurrentState = State.QUADCOPTER_CONTROLLING;
+                    GotQuadcopterControll?.Invoke(this, readyOne);
+                }
             }
         }
 
@@ -123,11 +128,27 @@ namespace task_4.Model
         public delegate void GotQuadcopterControllEventHandler(QuadOperator quadOperator, Quadcopter quadcopter);
         public event GotQuadcopterControllEventHandler? GotQuadcopterControll;
 
+        public delegate void FiredEventHandler(QuadOperator quadOperator);
+        public event FiredEventHandler? Fired;
+
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+
+        private RelayCommand? fireOperator;
+        public RelayCommand? FireOperator
+        {
+            get
+            {
+                return fireOperator ??= new RelayCommand(obj =>
+                {
+                    FireRequest = true;
+                    Logger.Instance.Log(ToString(), "Получил запрос на увольнение");
+                });
+            }
         }
 
         public override string ToString()

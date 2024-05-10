@@ -31,7 +31,7 @@ namespace task_4
 
         private void MainWindow_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            //logMessages.ScrollIntoView(logMessages.Items[logMessages.Items.Count - 1]);
+            logMessages.ScrollIntoView(logMessages.Items[logMessages.Items.Count - 1]);
         }
     }
 }

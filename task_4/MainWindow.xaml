@@ -11,34 +11,94 @@
         <local1:LogMessageToStringConverter x:Key="logMessageToStringConverter"/>
     </Window.Resources>
     <Grid>
-        <ListView ItemsSource="{Binding Path=Quadcopters}" Margin="29,49,457,269">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
-                        <TextBlock Grid.Column="0">
-                            <Run Text="{Binding Path=CurrentState, Mode=OneWay}"/>
-                            <Run Text="{Binding Path=Position, Mode=OneWay}"/>
-                            <Run Text="{Binding Path=DecommissionRequest, Mode=OneWay}"/>
-                        </TextBlock>
-                        <Button Grid.Column="1" Content="Удалить квадрокоптер" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding RemoveQuadcopter}" CommandParameter="{Binding}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <ListView ItemsSource="{Binding QuadOperators}" Margin="29,180,457,123">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock><Run Text="{Binding CurrentState, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Position, Mode=OneWay}"/></TextBlock>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <ListView x:Name="logMessages" ItemsSource="{Binding Path=Logger.Messages}" Margin="348,49,83,123">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource logMessageToStringConverter}}"/>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <Button x:Name="button" Content="Добавить квадрокоптер" HorizontalAlignment="Left" Margin="29,316,0,0" VerticalAlignment="Top" Command="{Binding AddQuadcopter}"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.5*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.33*"/>
+                <ColumnDefinition Width="0.33*"/>
+                <ColumnDefinition Width="0.33*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="35"/>
+                </Grid.RowDefinitions>
+                
+                <ListView Grid.Row="0" ItemsSource="{Binding Path=Quadcopters}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Grid.Column="0">
+                                    <Run Text="{Binding Path=CurrentState, Mode=OneWay}"/>
+                                    <Run Text="{Binding Path=Position, Mode=OneWay}"/>
+                                    <Run Text="{Binding Path=DecommissionRequest, Mode=OneWay}"/>
+                                </TextBlock>
+                                <Button 
+                                    Grid.Column="1" 
+                                    Content="Списать квадрокоптер" 
+                                    Command="{Binding RemoveQuadcopter}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <Button 
+                    Grid.Row="1"
+                    Content="Добавить квадрокоптер"
+                    Command="{Binding AddQuadcopter}"/>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="35"/>
+                </Grid.RowDefinitions>
+                
+                <ListView Grid.Row="0" Grid.Column="1" ItemsSource="{Binding QuadOperators}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock>
+                                    <Run Text="{Binding CurrentState, Mode=OneWay}"/>
+                                    <Run Text=" "/><Run Text="{Binding Position, Mode=OneWay}"/>
+                                    <Run Text="{Binding FireRequest, Mode=OneWay}"/>
+                                </TextBlock>
+
+                                <Button 
+                                    Grid.Column="1" 
+                                    Content="Уволить сотрудника"
+                                    Command="{Binding FireOperator}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <Button 
+                    Grid.Row="1" 
+                    Content="Добавить оператора" 
+                    Command="{Binding AddQuadOperator}"/>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*"/>
+                <ColumnDefinition Width="0.5*"/>
+            </Grid.ColumnDefinitions>
+
+            <ListView Grid.Column="1" x:Name="logMessages" ItemsSource="{Binding Path=Logger.Messages}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource logMessageToStringConverter}}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </Grid>
     </Grid>
 </Window>

@@ -21,12 +21,14 @@ namespace task_4.ViewModel
             {
                 Quadcopter quadcopter = new();
                 Quadcopters.Add(quadcopter);
+                quadcopter.Decommissioned += OnDecommissioned;
             }
 
             for (int i = 0; i < AppConfiguration.Instance.OPERATORS_INIT_NUMBER; i++)
             {
                 QuadOperator quadOperator = new();
                 QuadOperators.Add(quadOperator);
+                quadOperator.Fired += OnOperatorFired;
             }
 
             foreach (var quadcopter in Quadcopters)
@@ -37,7 +39,6 @@ namespace task_4.ViewModel
                     quadcopter.ReleaseControll += quadOperator.OnReleaseControll;
                     quadOperator.GotQuadcopterControll += quadcopter.OnGotQuadcopterControll;
                 }
-                quadcopter.Decommissioned += OnDecommissioned;
             }
 
             foreach(var quadcopter in Quadcopters)
@@ -66,6 +67,21 @@ namespace task_4.ViewModel
             });
         }
 
+        private void OnOperatorFired(QuadOperator quadOperator)
+        {
+            quadOperator.Fired -= OnOperatorFired;
+            foreach (var quadcopter in Quadcopters)
+            {
+                quadcopter.ReadyToFly -= quadOperator.OnReadyToFly;
+                quadcopter.ReleaseControll -= quadOperator.OnReleaseControll;
+                quadOperator.GotQuadcopterControll -= quadcopter.OnGotQuadcopterControll;
+            }
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                QuadOperators.Remove(quadOperator);
+            });
+        }
+
         private RelayCommand? addQuadcopter;
         public RelayCommand? AddQuadcopter
         {
@@ -88,6 +104,32 @@ namespace task_4.ViewModel
                     quadcopter.Decommissioned += OnDecommissioned;
 
                     quadcopter.Thread.Start();
+                });
+            }
+        }
+
+        private RelayCommand? addQuadOperator;
+        public RelayCommand? AddQuadOperator
+        {
+            get
+            {
+                return addQuadOperator ??= new RelayCommand(obj =>
+                {
+                    QuadOperator quadOperator = new();
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        QuadOperators.Add(quadOperator);
+                    });
+
+                    foreach (var quadcopter in Quadcopters)
+                    {
+                        quadcopter.ReadyToFly += quadOperator.OnReadyToFly;
+                        quadcopter.ReleaseControll += quadOperator.OnReleaseControll;
+                        quadOperator.GotQuadcopterControll += quadcopter.OnGotQuadcopterControll;
+                    }
+                    quadOperator.Fired += OnOperatorFired;
+
+                    quadOperator.Thread.Start();
                 });
             }
         }
