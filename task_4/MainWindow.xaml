@@ -83,6 +83,37 @@
                     Content="Добавить оператора" 
                     Command="{Binding AddQuadOperator}"/>
             </Grid>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="35"/>
+                </Grid.RowDefinitions>
+
+                <ListView Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SpecialMechanics}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock>
+                                    <Run Text="{Binding CurrentState, Mode=OneWay}"/>
+                                    <Run Text=" "/><Run Text="{Binding Position, Mode=OneWay}"/>
+                                    <Run Text="{Binding FireRequest, Mode=OneWay}"/>    
+                                </TextBlock>
+
+                                <Button 
+                                    Grid.Column="1" 
+                                    Content="Уволить сотрудника"
+                                    Command="{Binding FireMechanic}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <Button 
+                    Grid.Row="1" 
+                    Content="Добавить механика" 
+                    Command="{Binding AddMechanic}"/>
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="1">

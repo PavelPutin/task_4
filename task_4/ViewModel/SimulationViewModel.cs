@@ -13,6 +13,7 @@ namespace task_4.ViewModel
     {
         public ObservableCollection<Quadcopter> Quadcopters { get; } = [];
         public ObservableCollection<QuadOperator> QuadOperators { get; } = [];
+        public ObservableCollection<SpecialistMechanic> SpecialMechanics { get; } = [];
         public Logger Logger { get; } = Logger.Instance;
 
         public void Init()
@@ -29,6 +30,13 @@ namespace task_4.ViewModel
                 QuadOperator quadOperator = new();
                 QuadOperators.Add(quadOperator);
                 quadOperator.Fired += OnOperatorFired;
+            }
+
+            for (int i = 0; i < AppConfiguration.Instance.SPECIALIZED_MECHANICS_INIT_NUMBER; i++)
+            {
+                SpecialistMechanic mechanic = new();
+                SpecialMechanics.Add(mechanic);
+                mechanic.Fired += OnMechanicFired;
             }
 
             foreach (var quadcopter in Quadcopters)
@@ -49,6 +57,11 @@ namespace task_4.ViewModel
             foreach (var quadOperator in QuadOperators)
             {
                 quadOperator.Thread.Start();
+            }
+
+            foreach (var mechanic in SpecialMechanics)
+            {
+                mechanic.Thread.Start();
             }
         }
 
@@ -79,6 +92,15 @@ namespace task_4.ViewModel
             App.Current.Dispatcher.Invoke(() =>
             {
                 QuadOperators.Remove(quadOperator);
+            });
+        }
+
+        private void OnMechanicFired(SpecialistMechanic mechanic)
+        {
+            mechanic.Fired -= OnMechanicFired;
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                SpecialMechanics.Remove(mechanic);
             });
         }
 
@@ -130,6 +152,25 @@ namespace task_4.ViewModel
                     quadOperator.Fired += OnOperatorFired;
 
                     quadOperator.Thread.Start();
+                });
+            }
+        }
+
+        private RelayCommand? addMechanic;
+        public RelayCommand? AddMechanic
+        {
+            get
+            {
+                return addMechanic ??= new RelayCommand(obj =>
+                {
+                    SpecialistMechanic mechanic = new();
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        SpecialMechanics.Add(mechanic);
+                    });
+
+                    mechanic.Fired += OnMechanicFired;
+                    mechanic.Thread.Start();
                 });
             }
         }

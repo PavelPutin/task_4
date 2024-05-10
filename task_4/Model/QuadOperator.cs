@@ -99,7 +99,7 @@ namespace task_4.Model
         {
             lock(tryingGetControllLock)
             {
-                if (CurrentState == State.WAITING && Interlocked.CompareExchange(ref readyOne.controllingLocker, 1, 0) == 0)
+                if (CurrentState == State.WAITING && !FireRequest && Interlocked.CompareExchange(ref readyOne.controllingLocker, 1, 0) == 0)
                 {
                     Logger.Instance.Log(ToString(), "Получил управление над " + readyOne.ToString());
                     ControllingQuadcopter = readyOne;
@@ -107,11 +107,6 @@ namespace task_4.Model
                     GotQuadcopterControll?.Invoke(this, readyOne);
                 }
             }
-        }
-
-        public void OnQuadcopterBroken(Quadcopter brokenOne)
-        {
-
         }
 
         public void OnReleaseControll(Quadcopter quadcopter)

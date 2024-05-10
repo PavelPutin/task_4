@@ -10,6 +10,5 @@ namespace task_4.Model
         abstract public bool FireRequest { get; }
         abstract public int RepairTime { get; }
         abstract public Quadcopter? QuadcopterForRepair { get; set; }
-        abstract public void OnQuadcopterBroken(Quadcopter brokenOne);
     }
 }
