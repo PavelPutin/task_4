@@ -1,4 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace task_4.Model
 {
@@ -19,6 +22,22 @@ namespace task_4.Model
             App.Current.Dispatcher.Invoke(() =>
             {
                 Messages.Add(new LogMessage(sender, message));
+            });
+        }
+
+        public void SaveToFile()
+        {
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                string docPath =
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+                // Write the string array to a new file named "WriteLines.txt".
+                using (StreamWriter outputFile = new StreamWriter(Path.Combine(docPath, "it_task4.log")))
+                {
+                    foreach (var line in Messages)
+                        outputFile.WriteLine(line.Timestamp + " " + line.Sender + " " + line.Message);
+                }
             });
         }
     }

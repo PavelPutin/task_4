@@ -33,6 +33,7 @@ namespace task_4.Model
         private Quadcopter? quadcopterForRepair;
 
         private object tryingGetControllLock = new();
+        private object tryingGetRepairLock = new();
 
         public State CurrentState 
         {
@@ -86,10 +87,54 @@ namespace task_4.Model
             Logger.Instance.Log(ToString(), "Начал работу");
             while (!(CurrentState == State.WAITING && FireRequest))
             {
-                //switch (CurrentState)
-                //{
-                //    case State.WAITING: Logger.Instance.Log(ToString(), "Ожидает"); break;
-                //}
+                IMechanic mechanic = this;
+                switch (CurrentState)
+                {
+                    case State.TRAVELLING_TO_BROKEN_QUADCOPTER:
+                        Logger.Instance.Log(ToString(), "Едет к " + QuadcopterForRepair!.ToString());
+                        bool cameToDestination = Position == QuadcopterForRepair.Position;
+                        while (!cameToDestination)
+                        {
+                            Logger.Instance.Log(ToString(), "Проезжает точку " + Position);
+                            Thread.Sleep(TimeSpan.FromSeconds(1));
+
+                            Position = Math.Min(Position + mechanic.Speed, QuadcopterForRepair.Position);
+
+                            cameToDestination = Position == QuadcopterForRepair.Position;
+                        }
+                        if (cameToDestination)
+                        {
+                            Logger.Instance.Log(ToString(), "Доехал до " + QuadcopterForRepair!.ToString());
+                            CurrentState = State.REPAIRING;
+                        }
+                        break;
+                    case State.REPAIRING:
+                        Logger.Instance.Log(ToString(), "Начал ремонт " + QuadcopterForRepair!.ToString());
+                        startRepair?.Invoke(this);
+                        Thread.Sleep(TimeSpan.FromSeconds(mechanic.RepairTime));
+                        Logger.Instance.Log(ToString(), "Закончил ремонт " + QuadcopterForRepair!.ToString());
+                        finishRepair?.Invoke(this);
+                        CurrentState = State.TRAVELLING_BACK;
+                        break;
+                    case State.TRAVELLING_BACK:
+                        Logger.Instance.Log(ToString(), "Едет к порту");
+                        bool cameBackToDestination = Position == 0;
+                        while (!cameBackToDestination)
+                        {
+                            Logger.Instance.Log(ToString(), "Проезжает точку " + Position);
+                            Thread.Sleep(TimeSpan.FromSeconds(1));
+
+                            Position = Math.Max(Position - mechanic.Speed, 0);
+
+                            cameBackToDestination = Position == 0;
+                        }
+                        if (cameBackToDestination)
+                        {
+                            Logger.Instance.Log(ToString(), "Доехал до порта");
+                            CurrentState = State.WAITING;
+                        }
+                        break;
+                }
             }
             Logger.Instance.Log(ToString(), "Уволен");
             Fired?.Invoke(this);
@@ -120,17 +165,63 @@ namespace task_4.Model
             }
         }
 
+        public bool TryStartTravelling(Quadcopter brokenOne)
+        {
+            lock (tryingGetRepairLock)
+            {
+                if (CurrentState == State.WAITING && !FireRequest && Interlocked.CompareExchange(ref brokenOne.repairingLocker, 1, 0) == 0)
+                {
+                    Logger.Instance.Log(ToString(), "Поехал чинить " + brokenOne.ToString());
+                    quadcopterForRepair = brokenOne;
+                    CurrentState = State.TRAVELLING_TO_BROKEN_QUADCOPTER;
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public delegate void GotQuadcopterControllEventHandler(QuadOperator quadOperator, Quadcopter quadcopter);
         public event GotQuadcopterControllEventHandler? GotQuadcopterControll;
 
         public delegate void FiredEventHandler(QuadOperator quadOperator);
         public event FiredEventHandler? Fired;
 
+        public delegate void FinishRepairEventHandler(IMechanic mechanic);
+        public event FinishRepairEventHandler? FinishRepair;
+
+        private IMechanic.FinishRepairEventHandler? finishRepair;
+        event IMechanic.FinishRepairEventHandler? IMechanic.FinishRepair
+        {
+            add
+            {
+                finishRepair += value;
+            }
+
+            remove
+            {
+                finishRepair -= value;
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+
+        private IMechanic.StartRepairEventHandler? startRepair;
+        event IMechanic.StartRepairEventHandler? IMechanic.StartRepair
+        {
+            add
+            {
+                startRepair += value;
+            }
+
+            remove
+            {
+                startRepair -= value;
+            }
         }
 
         private RelayCommand? fireOperator;
@@ -148,7 +239,7 @@ namespace task_4.Model
 
         public override string ToString()
         {
-            return "Оператор " + id;
+            return "Оператор " + id + "(" + CurrentState + ")";
         }
     }
 }

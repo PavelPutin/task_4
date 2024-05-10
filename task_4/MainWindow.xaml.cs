@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +28,12 @@ namespace task_4
             ((INotifyCollectionChanged)logMessages.Items.SourceCollection).CollectionChanged += MainWindow_CollectionChanged; ;
             simulationViewModel.Init();
             DataContext = simulationViewModel;
+            this.Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            Logger.Instance.SaveToFile();
         }
 
         private void MainWindow_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

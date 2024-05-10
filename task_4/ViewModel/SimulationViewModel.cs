@@ -11,6 +11,8 @@ namespace task_4.ViewModel
 {
     public class SimulationViewModel
     {
+        private object bookenProcessingLock = new();
+
         public ObservableCollection<Quadcopter> Quadcopters { get; } = [];
         public ObservableCollection<QuadOperator> QuadOperators { get; } = [];
         public ObservableCollection<SpecialistMechanic> SpecialMechanics { get; } = [];
@@ -23,6 +25,7 @@ namespace task_4.ViewModel
                 Quadcopter quadcopter = new();
                 Quadcopters.Add(quadcopter);
                 quadcopter.Decommissioned += OnDecommissioned;
+                quadcopter.Broken += OnQuadcopterBroken;
             }
 
             for (int i = 0; i < AppConfiguration.Instance.OPERATORS_INIT_NUMBER; i++)
@@ -68,6 +71,7 @@ namespace task_4.ViewModel
         private void OnDecommissioned(Quadcopter quadcopter)
         {
             quadcopter.Decommissioned -= OnDecommissioned;
+            quadcopter.Broken -= OnQuadcopterBroken;
             foreach (var quadOperator in QuadOperators)
             {
                 quadcopter.ReadyToFly -= quadOperator.OnReadyToFly;
@@ -78,6 +82,37 @@ namespace task_4.ViewModel
             {
                 Quadcopters.Remove(quadcopter);
             });
+        }
+
+        private void OnQuadcopterBroken(Quadcopter quadcopter)
+        {
+            lock (bookenProcessingLock)
+            {
+                IMechanic? selected = null;
+                foreach (var mechanic in SpecialMechanics)
+                {
+                    if (mechanic.TryStartTravelling(quadcopter))
+                    {
+                        selected = mechanic;
+                    }
+                }
+
+                if (selected == null)
+                {
+                    foreach (var mechanic in QuadOperators)
+                    {
+                        if (mechanic.TryStartTravelling(quadcopter))
+                        {
+                            selected = mechanic;
+                        }
+                    }
+                }
+
+                if (selected != null)
+                {
+                    quadcopter.StartWaiting(selected);
+                }
+            }
         }
 
         private void OnOperatorFired(QuadOperator quadOperator)

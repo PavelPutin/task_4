@@ -43,6 +43,7 @@ namespace task_4.Model
         private QuadOperator? controllingOperator;
 
         public int controllingLocker = 0;
+        public int repairingLocker = 0;
 
         public State CurrentState {
             get => currentState;
@@ -134,6 +135,16 @@ namespace task_4.Model
                         while (!cameToDestination)
                         {
                             Logger.Instance.Log(ToString(), "Пролетает над точкой " + Position);
+                            if (Random.Shared.NextDouble() < AppConfiguration.Instance.QUADCOPTER_BREAKDOWN_RATE)
+                            {
+                                Logger.Instance.Log(ToString(), "ПОЛОМКА! Потерял сигнал! Приземляется! Вызыет механика!");
+                                CurrentState = State.BROKEN;
+                                ReleaseControll?.Invoke(this);
+                                Broken?.Invoke(this);
+                                Thread.Sleep(TimeSpan.FromSeconds(AppConfiguration.Instance.QUADCOPTER_LANDING_TIME));
+                                Logger.Instance.Log(ToString(), "ПОЛОМКА! Успешно приземлился!");
+                                break;
+                            }
                             Thread.Sleep(TimeSpan.FromSeconds(1));
                             switch (Destination)
                             {
@@ -145,9 +156,15 @@ namespace task_4.Model
                                 Destination == Place.POLAR_STATION && Position == AppConfiguration.Instance.DISTANCE ||
                                 Destination == Place.PORT && Position == 0;
                         }
-                        Logger.Instance.Log(ToString(), "Долетел до " + Destination);
-                        Destination = Destination == Place.POLAR_STATION ? Place.PORT : Place.POLAR_STATION;
-                        CurrentState = State.LANDING;
+                        if (cameToDestination)
+                        {
+                            Logger.Instance.Log(ToString(), "Долетел до " + Destination);
+                            Destination = Destination == Place.POLAR_STATION ? Place.PORT : Place.POLAR_STATION;
+                            CurrentState = State.LANDING;
+                        }
+                        break;
+                    case State.BROKEN:
+                        Broken?.Invoke(this);
                         break;
                     case State.LANDING:
                         Logger.Instance.Log(ToString(), "Приземляется");
@@ -160,6 +177,29 @@ namespace task_4.Model
             }
             Logger.Instance.Log(ToString(), "Списан");
             Decommissioned?.Invoke(this);
+        }
+
+        public void StartWaiting(IMechanic mechanic)
+        {
+            Logger.Instance.Log(ToString(), "Ожидает механика");
+            CurrentState = State.MECHANIC_WAITING;
+            mechanic.StartRepair += OnStartRepair;
+            mechanic.FinishRepair += OnFinishRepair;
+        }
+
+        public void OnStartRepair(IMechanic mechanic)
+        {
+            CurrentState = State.REPAIRING;
+            Logger.Instance.Log(ToString(), "В процессе ремонта");
+            mechanic.FinishRepair -= OnStartRepair;
+        }
+
+        public void OnFinishRepair(IMechanic mechanic)
+        {
+            CurrentState = State.READY_TO_FLY;
+            Logger.Instance.Log(ToString(), "Снова функционирует");
+            Interlocked.Exchange(ref repairingLocker, 0);
+            mechanic.FinishRepair -= OnFinishRepair;
         }
 
         public void OnGotQuadcopterControll(QuadOperator quadOperator, Quadcopter quadcopter)
@@ -180,6 +220,9 @@ namespace task_4.Model
 
         public delegate void DecommissionedEventHandler(Quadcopter quadcopter);
         public event DecommissionedEventHandler? Decommissioned;
+
+        public delegate void BrokenEventHandler(Quadcopter quadcopter);
+        public event BrokenEventHandler? Broken;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")
@@ -203,7 +246,7 @@ namespace task_4.Model
 
         override public string ToString()
         {
-            return "Квадрокоптер " + id;
+            return "Квадрокоптер " + id + "(" + CurrentState + ")";
         }
     }
 }
