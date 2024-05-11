@@ -78,7 +78,7 @@ namespace task_4.ViewModel
                 quadcopter.ReleaseControll -= quadOperator.OnReleaseControll;
                 quadOperator.GotQuadcopterControll -= quadcopter.OnGotQuadcopterControll;
             }
-            App.Current.Dispatcher.Invoke(() =>
+            App.Current?.Dispatcher.Invoke(() =>
             {
                 Quadcopters.Remove(quadcopter);
             });
@@ -124,7 +124,7 @@ namespace task_4.ViewModel
                 quadcopter.ReleaseControll -= quadOperator.OnReleaseControll;
                 quadOperator.GotQuadcopterControll -= quadcopter.OnGotQuadcopterControll;
             }
-            App.Current.Dispatcher.Invoke(() =>
+            App.Current?.Dispatcher.Invoke(() =>
             {
                 QuadOperators.Remove(quadOperator);
             });
@@ -133,7 +133,7 @@ namespace task_4.ViewModel
         private void OnMechanicFired(SpecialistMechanic mechanic)
         {
             mechanic.Fired -= OnMechanicFired;
-            App.Current.Dispatcher.Invoke(() =>
+            App.Current?.Dispatcher.Invoke(() =>
             {
                 SpecialMechanics.Remove(mechanic);
             });
@@ -147,7 +147,7 @@ namespace task_4.ViewModel
                 return addQuadcopter ??= new RelayCommand(obj =>
                 {
                     Quadcopter quadcopter = new();
-                    App.Current.Dispatcher.Invoke(() =>
+                    App.Current?.Dispatcher.Invoke(() =>
                     {
                         Quadcopters.Add(quadcopter);
                     });
@@ -174,7 +174,7 @@ namespace task_4.ViewModel
                 return addQuadOperator ??= new RelayCommand(obj =>
                 {
                     QuadOperator quadOperator = new();
-                    App.Current.Dispatcher.Invoke(() =>
+                    App.Current?.Dispatcher.Invoke(() =>
                     {
                         QuadOperators.Add(quadOperator);
                     });
@@ -200,7 +200,7 @@ namespace task_4.ViewModel
                 return addMechanic ??= new RelayCommand(obj =>
                 {
                     SpecialistMechanic mechanic = new();
-                    App.Current.Dispatcher.Invoke(() =>
+                    App.Current?.Dispatcher.Invoke(() =>
                     {
                         SpecialMechanics.Add(mechanic);
                     });

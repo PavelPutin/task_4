@@ -19,7 +19,7 @@ namespace task_4.Model
 
         public void Log(string sender, string message)
         {
-            App.Current.Dispatcher.Invoke(() =>
+            App.Current?.Dispatcher.Invoke(() =>
             {
                 Messages.Add(new LogMessage(sender, message));
             });
@@ -27,7 +27,7 @@ namespace task_4.Model
 
         public void SaveToFile()
         {
-            App.Current.Dispatcher.Invoke(() =>
+            App.Current?.Dispatcher.Invoke(() =>
             {
                 string docPath =
                     Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);

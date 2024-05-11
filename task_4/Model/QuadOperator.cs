@@ -35,6 +35,7 @@ namespace task_4.Model
         private object tryingGetControllLock = new();
         private object tryingGetRepairLock = new();
 
+        public int Id => id;
         public State CurrentState 
         {
             get => currentState; 
@@ -114,6 +115,7 @@ namespace task_4.Model
                         Thread.Sleep(TimeSpan.FromSeconds(mechanic.RepairTime));
                         Logger.Instance.Log(ToString(), "Закончил ремонт " + QuadcopterForRepair!.ToString());
                         finishRepair?.Invoke(this);
+                        QuadcopterForRepair = null;
                         CurrentState = State.TRAVELLING_BACK;
                         break;
                     case State.TRAVELLING_BACK:
@@ -160,7 +162,7 @@ namespace task_4.Model
             {
                 Logger.Instance.Log(ToString(), "Прекратил управление " + quadcopter.ToString());
                 Interlocked.Exchange(ref quadcopter.controllingLocker, 0);
-                controllingQuadcopter = null;
+                ControllingQuadcopter = null;
                 CurrentState = State.WAITING;
             }
         }

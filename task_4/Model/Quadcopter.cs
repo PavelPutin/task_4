@@ -45,6 +45,7 @@ namespace task_4.Model
         public int controllingLocker = 0;
         public int repairingLocker = 0;
 
+        public int Id => id;
         public State CurrentState {
             get => currentState;
             private set

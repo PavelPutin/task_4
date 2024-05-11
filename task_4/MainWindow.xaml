@@ -32,17 +32,7 @@
                 <ListView Grid.Row="0" ItemsSource="{Binding Path=Quadcopters}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Grid.Column="0">
-                                    <Run Text="{Binding Path=CurrentState, Mode=OneWay}"/>
-                                    <Run Text="{Binding Path=Position, Mode=OneWay}"/>
-                                    <Run Text="{Binding Path=DecommissionRequest, Mode=OneWay}"/>
-                                </TextBlock>
-                                <Button 
-                                    Grid.Column="1" 
-                                    Content="Списать квадрокоптер" 
-                                    Command="{Binding RemoveQuadcopter}"/>
-                            </StackPanel>
+                            <local:QuadcopterController DataContext="{Binding}"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
@@ -62,18 +52,7 @@
                 <ListView Grid.Row="0" Grid.Column="1" ItemsSource="{Binding QuadOperators}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock>
-                                    <Run Text="{Binding CurrentState, Mode=OneWay}"/>
-                                    <Run Text=" "/><Run Text="{Binding Position, Mode=OneWay}"/>
-                                    <Run Text="{Binding FireRequest, Mode=OneWay}"/>
-                                </TextBlock>
-
-                                <Button 
-                                    Grid.Column="1" 
-                                    Content="Уволить сотрудника"
-                                    Command="{Binding FireOperator}"/>
-                            </StackPanel>
+                            <local:OperatorController DataContext="{Binding}"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
@@ -93,18 +72,7 @@
                 <ListView Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SpecialMechanics}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock>
-                                    <Run Text="{Binding CurrentState, Mode=OneWay}"/>
-                                    <Run Text=" "/><Run Text="{Binding Position, Mode=OneWay}"/>
-                                    <Run Text="{Binding FireRequest, Mode=OneWay}"/>    
-                                </TextBlock>
-
-                                <Button 
-                                    Grid.Column="1" 
-                                    Content="Уволить сотрудника"
-                                    Command="{Binding FireMechanic}"/>
-                            </StackPanel>
+                            <local:MechanicController DataContext="{Binding}"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
