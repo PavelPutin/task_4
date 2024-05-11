@@ -94,7 +94,7 @@ namespace task_4.Model
         public void StartExploitation()
         {
             Logger.Instance.Log(ToString(), "Введён в эксплуатацию");
-            while (!((CurrentState == State.PREFLYING_PREPARING_WAITING || CurrentState == State.PREFLYING_PREPARING || CurrentState == State.READY_TO_FLY) && DecommissionRequest))
+            while (!((CurrentState == State.PREFLYING_PREPARING_WAITING || CurrentState == State.PREFLYING_PREPARING) && DecommissionRequest))
             {
                 switch (CurrentState)
                 {
@@ -141,7 +141,6 @@ namespace task_4.Model
                                 Logger.Instance.Log(ToString(), "ПОЛОМКА! Потерял сигнал! Приземляется! Вызыет механика!");
                                 CurrentState = State.BROKEN;
                                 ReleaseControll?.Invoke(this);
-                                Broken?.Invoke(this);
                                 Thread.Sleep(TimeSpan.FromSeconds(AppConfiguration.Instance.QUADCOPTER_LANDING_TIME));
                                 Logger.Instance.Log(ToString(), "ПОЛОМКА! Успешно приземлился!");
                                 break;
@@ -192,7 +191,7 @@ namespace task_4.Model
         {
             CurrentState = State.REPAIRING;
             Logger.Instance.Log(ToString(), "В процессе ремонта");
-            mechanic.FinishRepair -= OnStartRepair;
+            mechanic.StartRepair -= OnStartRepair;
         }
 
         public void OnFinishRepair(IMechanic mechanic)

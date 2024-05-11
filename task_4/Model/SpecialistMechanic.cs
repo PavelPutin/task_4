@@ -138,7 +138,7 @@ namespace task_4.Model
                 if (CurrentState == State.WAITING && !FireRequest && Interlocked.CompareExchange(ref brokenOne.repairingLocker, 1, 0) == 0)
                 {
                     Logger.Instance.Log(ToString(), "Поехал чинить " + brokenOne.ToString());
-                    quadcopterForRepair = brokenOne;
+                    QuadcopterForRepair = brokenOne;
                     CurrentState = State.TRAVELLING_TO_BROKEN_QUADCOPTER;
                     return true;
                 }
